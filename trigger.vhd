@@ -1,5 +1,4 @@
 -- GRBalpha trigger algorithm
--- Last updated: 2020 feb 06
 -- Written by Gergely Dálya
 -- dalyag@caesar.elte.hu
 
@@ -67,7 +66,7 @@ begin
  -- with EMAX_CHOOSE select
      -- EMAX <= ... 
      
-     process (CLK) is
+     Clk_Proc : process (CLK) is
      begin
         if rising_edge (CLK) then
             ticks <= ticks + 1;
@@ -87,7 +86,7 @@ begin
             end if;    
              
         end if;
-     end process;
+     end process Clk_Proc;
 
 
 
