@@ -168,7 +168,7 @@ begin
         if step_counter = n+N:
             stackfull <= '1';
         end if;
-    end process Stack_Full_Check
+    end process Stack_Full_Check;
     
      
     S_And_B_Accumulation : process (step_counter) is
