@@ -118,6 +118,7 @@ begin
 
     Reset_After_Change : process (EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE) is
     begin
+        counter := 0;
         stack := others => 0;
         stackfull <= '0';
         step_counter := 0;
@@ -211,6 +212,7 @@ begin
         if (comp1 = '1' and comp2 = '1' and CLEAR = '0' and stackfull = '1') then
             TRIGGER <= '1';
             -- reset the stack, the counter indicating whether the stack is full, accumulated_signal and accumulated_background
+            counter := 0;
             stack := others => 0;
             stackfull <= '0';
             step_counter := 0;
