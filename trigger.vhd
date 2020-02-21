@@ -1,5 +1,5 @@
 -- GRBalpha trigger algorithm
--- Written by Gergely Dálya
+-- Written by Gergely Dálya, 2020
 -- dalyag@caesar.elte.hu
 
 library IEEE;
@@ -38,28 +38,28 @@ end TrigCircuit;
 
 architecture TrigArch of TrigCircuit is
 
-type shift_register is array (0 to 4095) of unsigned;
+type shift_register is array (0 to 4095) of unsigned (13 downto 0);
 
 constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
 constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
 
 signal EMIN         : std_logic_vector (15 downto 0);
 signal EMAX         : std_logic_vector (15 downto 0);
-signal K            : std_logic_vector (15 downto 0);
 signal T            : std_logic_vector (9 downto 0);
 signal SIGWIN       : std_logic_vector (15 downto 0);
 signal BGWIN        : std_logic_vector (15 downto 0);
-signal ticks        : unsigned;
-signal millisecs    : unsigned;
-signal counter      : unsigned;
+signal K            : unsigned (7 downto 0);
+signal ticks        : unsigned (3 downto 0);
+signal millisecs    : unsigned (9 downto 0);  -- have to have at least the same size as T
+signal counter      : unsigned (13 downto 0);
 
 signal stack : shift_register := others => 0;
 
-variable accumulated_signal         : unsigned;
-variable accumulated_background     : unsigned;
-variable n                          : unsigned;
-variable N                          : unsigned;
-variable step_counter               : unsigned := 0;
+variable accumulated_signal         : unsigned (19 downto 0);
+variable accumulated_background     : unsigned (19 downto 0);
+variable n                          : unsigned (10 downto 0);  -- max value: 2048
+variable N                          : unsigned (10 downto 0);  -- max value: 2048
+variable step_counter               : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
 
 signal stackfull    : std_logic := '0';
 signal comp1        : std_logic := '0';
@@ -85,7 +85,7 @@ begin
                   1024  when "0101",
                   2048  when "0110",
                   4096  when "0111",
-                  8196  when "1000",
+                  8192  when "1000",
                   16384 when "1001",
                   32768 when "1010",
                   65536 when "1011",
@@ -103,23 +103,22 @@ begin
 -- of the stack, we should impement a stack with the maximal size, i.e. 2*2048=4096, and then 
 -- dynamically change which parts are added to / subtracted from it.
 
-              
-    with K_CHOOSE select
-        K <= ... 
      
-    with EMIN_CHOOSE select
-        EMIN <= ... 
+    with EMIN_CHOOSE select  -- Energy range ~ 10-10.000 keV
+        EMIN <= ...
      
     with EMAX_CHOOSE select
         EMAX <= ... 
+        
+    K <= unsigned(K_CHOOSE);
         
         
 -- I think that whenever we change one of the inputs of [EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE], the stack should reset, to avoid some strange unwanted behaviour due to leftover count numbers somewhere, so:
 
     Reset_After_Change : process (EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE) is
     begin
-        counter := 0;
-        stack := others => 0;
+        counter <= 0;
+        stack <= others => 0;
         stackfull <= '0';
         step_counter := 0;
         accumulated_signal := 0;
@@ -175,16 +174,16 @@ begin
     S_And_B_Accumulation : process (step_counter) is
     begin
        accumulated_signal := accumulated_signal + stack(0) - stack(n-1)
-       accumulated_background := accumulated_background + stack(n) - stack(n+N-1)
+       accumulated_background := accumulated_background + stack(n-1) - stack(n+N-1)
     end process S_And_B_Accumulation;
      
      
     Comparison1 : process (step_counter) is
-       variable S, B, SmBsq : unsigned;
+       variable S, B, SmBsq : unsigned (19 downto 0);
     begin
-       S = accumulated_signal / n;
-       B = accumulated_background / N;
-       SmBsq = (S - B) ** 2;
+       S := accumulated_signal / n;
+       B := accumulated_background / N;
+       SmBsq := (S - B) ** 2;
             
        if SmBsq > K*B then
            comp1 <= '1';
@@ -195,10 +194,10 @@ begin
      
      
     Comparison2 : process (step_counter) is
-       variable S, B : unsigned;
+       variable S, B : unsigned (19 downto 0);
     begin
-        S = accumulated_signal / n;
-        B = accumulated_signal / N;
+        S := accumulated_signal / n;
+        B := accumulated_signal / N;
         
         if S > B then
             comp2 <= '1';
@@ -212,8 +211,8 @@ begin
         if (comp1 = '1' and comp2 = '1' and CLEAR = '0' and stackfull = '1') then
             TRIGGER <= '1';
             -- reset the stack, the counter indicating whether the stack is full, accumulated_signal and accumulated_background
-            counter := 0;
-            stack := others => 0;
+            counter <= 0;
+            stack <= others => 0;
             stackfull <= '0';
             step_counter := 0;
             accumulated_signal := 0;
