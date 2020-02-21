@@ -37,7 +37,7 @@ end TrigCircuit;
 
 architecture TrigArch of TrigCircuit is
 
-type shift_register is array (0 to 4095) of unsigned (13 downto 0);
+type shift_register is array (0 to 4096) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter.
 
 constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
 constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
@@ -178,8 +178,8 @@ begin
      
     S_And_B_Accumulation : process (step_counter) is
     begin
-       accumulated_signal := accumulated_signal + stack(0) - stack(n-1)
-       accumulated_background := accumulated_background + stack(n-1) - stack(n+N-1)
+       accumulated_signal := accumulated_signal + stack(0) - stack(n);
+       accumulated_background := accumulated_background + stack(n) - stack(n+N);
     end process S_And_B_Accumulation;
      
      
