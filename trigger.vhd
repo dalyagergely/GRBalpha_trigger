@@ -10,9 +10,7 @@ use ieee.math_real.all;
 
 entity TrigCircuit is
     port (
-        -- we need to figure out what will be the possible values for EMIN, EMAX, PH and K
         EMIN_CHOOSE         : in std_logic_vector (7 downto 0);  
-        -- it will enable us to choose between pre-defined EMIN values
         EMAX_CHOOSE         : in std_logic_vector (7 downto 0);
         T_CHOOSE            : in std_logic_vector (2 downto 0);
         -- T is the integration time of the counter before the stack
@@ -24,13 +22,14 @@ entity TrigCircuit is
         -- The output of the gamma detector is 12 bit ADC data
         CLK                 : in std_logic;
         CLEAR               : in std_logic := '0';
-        -- if CLEAR='1', it clears the GRB flag output (i.e. TRIGGER)
-        
+        -- if CLEAR='1', it clears the GRB flag output (i.e. TRIGGER)       
         TRIGGER             : out std_logic;
         -- either '1': there is a GRB, or '0': there is no GRB
-        WHICH_ACTIVE        : out std_logic_vector (11 downto 0)
-        -- Ohno-san: "It would be good if the output signal which tells which trigger block(s) is activated. We can prepare multiple trigger judgement blocks in parallel. But it should be discussed which kind of trigger judgement conditions should be considered as the parallel processing."
-        -- What are the important parameters to write out at a trigger? EMIN, EMAX, T and K?
+        EMIN_OUT            : out std_logic_vector (7 downto 0);
+        EMAX_OUT            : out std_logic_vector (7 downto 0);
+        T_OUT               : out std_logic_vector (2 downto 0);
+        K_OUT               : out std_logic_vector (7 downto 0);
+        WIN_OUT             : out std_logic_vector (3 downto 0)
     );
 end TrigCircuit;
 
@@ -49,7 +48,7 @@ signal T            : std_logic_vector (9 downto 0);
 signal SIGWIN       : std_logic_vector (15 downto 0);
 signal BGWIN        : std_logic_vector (15 downto 0);
 signal K            : unsigned (7 downto 0);
-signal ticks        : unsigned (3 downto 0);
+signal ticks        : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
 signal millisecs    : unsigned (9 downto 0);  -- have to have at least the same size as T
 signal counter      : unsigned (13 downto 0);
 
@@ -111,6 +110,12 @@ begin
         EMAX <= ... 
         
     K <= unsigned(K_CHOOSE);
+    
+    EMIN_OUT <= EMIN_CHOOSE;
+    EMAX_OUT <= EMAX_CHOOSE;
+    K_OUT    <= K_CHOOSE;
+    T_OUT    <= T_CHOOSE;
+    WIN_OUT  <= WIN_CHOOSE;
         
         
 -- I think that whenever we change one of the inputs of [EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE], the stack should reset, to avoid some strange unwanted behaviour due to leftover count numbers somewhere, so:
