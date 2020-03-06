@@ -44,21 +44,22 @@ constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
 
 signal EMIN         : std_logic_vector (15 downto 0);
 signal EMAX         : std_logic_vector (15 downto 0);
-signal T            : std_logic_vector (9 downto 0);
-signal SIGWIN       : std_logic_vector (15 downto 0);
-signal BGWIN        : std_logic_vector (15 downto 0);
+signal T            : unsigned (9 downto 0);
+signal SIGWIN       : unsigned (15 downto 0);
+signal BGWIN        : unsigned (15 downto 0);
 signal K            : unsigned (7 downto 0);
-signal ticks        : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
-signal millisecs    : unsigned (9 downto 0);  -- have to have at least the same size as T
 signal counter      : unsigned (13 downto 0);
 
-signal stack : shift_register := others => 0;
+signal stack : shift_register := (others => 0);
 
-variable accumulated_signal         : unsigned (19 downto 0);
-variable accumulated_background     : unsigned (19 downto 0);
-variable n                          : unsigned (10 downto 0);  -- max value: 2048
-variable N                          : unsigned (10 downto 0);  -- max value: 2048
-variable step_counter               : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
+-- variables cannot be declared here, also the compiler isn't case sensitive, so I changed N to NN  - fg
+--signal accumulated_signal         : unsigned (19 downto 0);
+--signal accumulated_background     : unsigned (19 downto 0);
+--signal n                          : unsigned (10 downto 0);  -- max value: 2048
+--signal NN                         : unsigned (10 downto 0);  -- max value: 2048
+--signal step_counter               : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
+signal S            : unsigned (19 downto 0);
+signal B            : unsigned (19 downto 0);
 
 signal stackfull    : std_logic := '0';
 signal comp1        : std_logic := '0';
@@ -102,12 +103,14 @@ begin
 -- of the stack, we should impement a stack with the maximal size, i.e. 2*2048=4096, and then 
 -- dynamically change which parts are added to / subtracted from it.
 
+
+-- took these out to check synthesis - fg
      
-    with EMIN_CHOOSE select  -- Energy range ~ 10-10.000 keV
-        EMIN <= ...
+--    with EMIN_CHOOSE select  -- Energy range ~ 10-10.000 keV
+--        EMIN <= ...
      
-    with EMAX_CHOOSE select
-        EMAX <= ... 
+--    with EMAX_CHOOSE select
+--        EMAX <= ... 
         
     K <= unsigned(K_CHOOSE);
     
@@ -120,75 +123,85 @@ begin
         
 -- I think that whenever we change one of the inputs of [EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE], the stack should reset, to avoid some strange unwanted behaviour due to leftover count numbers somewhere, so:
 
-    Reset_After_Change : process (EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE) is
-    begin
-        counter <= 0;
-        stack <= others => 0;
-        stackfull <= '0';
-        step_counter := 0;
-        accumulated_signal := 0;
-        accumulated_background := 0;
-    end process Reset_After_Change;
+--    Reset_After_Change : process (EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE) is
+--    begin
+--        counter <= 0;
+--        stack <= (others => 0);  
+--        stackfull <= '0';
+--        step_counter <= 0;
+--        accumulated_signal <= 0;
+--        accumulated_background <= 0;
+--    end process Reset_After_Change;
         
         
-    n := SIGWIN / T;
-    N := BGWIN / T;
+--    n  <= to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);  -- had problems with "=" operator - fg
+--    NN <= to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
         
      
-    Clk_Proc : process (CLK) is
+    Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K) is
+        variable ticks          : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
+        variable millisecs      : unsigned (9 downto 0);  -- have to have at least the same size as T
+        variable step_counter   : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
     begin
-       if rising_edge (CLK) then
-           ticks <= ticks + 1;
+    
+        if EMIN'event or EMAX'event or SIGWIN'event or BGWIN'event or T'event or K'event or TRIGGER = '1' then
+            ticks := 0;
+            millisecs := 0;
+            step_counter := 0;
+            stackfull <= '0';
+            stack <= (others => 0);
+        end if;
+    
+        if rising_edge (CLK) then
+            ticks := ticks + 1;
            
-           if EMIN < PH and EMAX > PH then  -- filter based on the energy
-               counter <= counter + 1;
-           end if;
+            if EMIN < PH and EMAX > PH then  -- filter based on the energy
+                counter <= counter + 1;
+            end if;
            
-           if ticks = CLK_FREQ_MHZ - 1 then  -- count the milliseconds based on clk frequency
-               ticks <= 0;
-               millisecs <= millisecs + 1;
-           end if;   
+            if ticks = CLK_FREQ_MHZ - 1 then  -- count the milliseconds based on clk frequency
+                ticks := 0;
+                millisecs := millisecs + 1;
+            end if;   
             
-           if millisecs = T then
-               millisecs <= 0;  -- reset millisecs
-               counter <= 0;  -- reset counter
-           end if;    
+            if millisecs = T then
+                stack(0) <=  counter;
+                for i in 4096 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
+	                stack(i) <= stack(i-1);
+                end loop;
+                step_counter := step_counter + 1;
+                millisecs := 0;
+                counter <= 0;
+            end if;   
+            
+            if step_counter = (SIGWIN/T) + (BGWIN/T) then   -- Stack full check: step_counter = n+NN
+                stackfull <= '1';
+            end if;
              
-       end if;
+        end if;
     end process Clk_Proc;
      
      
-    Stepping : process (millisecs) is
-    begin
-       if millisecs = T then
-           stack    <=  shift_right(stack, 1); -- shift to the right by one bit
-           stack(0) <=  counter;
-           step_counter := step_counter + 1;
-       end if;            
-    end process Stepping;
-    
-    
-    Stack_Full_Check : process (step_counter) is
-    begin
-        if step_counter = n+N:
-            stackfull <= '1';
-        end if;
-    end process Stack_Full_Check;
+
     
      
-    S_And_B_Accumulation : process (step_counter) is
+    S_And_B_Accumulation : process (stack) is
+        Variable n, NN      : unsigned (10 downto 0);
+        Variable accumulated_signal, accumulated_background : unsigned (19 downto 0);
     begin
-       accumulated_signal := accumulated_signal + stack(0) - stack(n);
-       accumulated_background := accumulated_background + stack(n) - stack(n+N);
+        n := SIGWIN / T;
+        NN := BGWIN / T;
+        accumulated_signal <= accumulated_signal + stack(0) - stack(n);  
+        accumulated_background <= accumulated_background + stack(n) - stack(n+NN);
+        S <= accumulated_signal / n;
+        B <= accumulated_background / NN;
     end process S_And_B_Accumulation;
      
      
-    Comparison1 : process (step_counter) is
-       variable S, B, SmBsq : unsigned (19 downto 0);
+    Comparison1 : process (S, B, K) is
+       variable SmBsq       : unsigned (19 downto 0);
     begin
-       S := accumulated_signal / n;
-       B := accumulated_background / N;
-       SmBsq := (S - B) ** 2;
+       SmBsq := to_unsigned(to_integer(S - B) * to_integer(S - B), 20); -- problems with "**" operator - fg
             
        if SmBsq > K*B then
            comp1 <= '1';
@@ -198,12 +211,8 @@ begin
     end process Comparison1;       
      
      
-    Comparison2 : process (step_counter) is
-       variable S, B : unsigned (19 downto 0);
-    begin
-        S := accumulated_signal / n;
-        B := accumulated_signal / N;
-        
+    Comparison2 : process (S, B) is
+    begin 
         if S > B then
             comp2 <= '1';
         else
@@ -212,16 +221,10 @@ begin
     end process Comparison2;
     
     
-    Triggering : process (step_counter) is
+    Triggering : process (comp1, comp2, stackfull, CLEAR) is
+    begin
         if (comp1 = '1' and comp2 = '1' and CLEAR = '0' and stackfull = '1') then
             TRIGGER <= '1';
-            -- reset the stack, the counter indicating whether the stack is full, accumulated_signal and accumulated_background
-            counter <= 0;
-            stack <= others => 0;
-            stackfull <= '0';
-            step_counter := 0;
-            accumulated_signal := 0;
-            accumulated_background := 0;
         else
             TRIGGER <= '0';
         end if;
@@ -230,5 +233,3 @@ begin
 
 
 end TrigArch;
-        
-
