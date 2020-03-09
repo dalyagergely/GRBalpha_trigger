@@ -37,7 +37,7 @@ end TrigCircuit;
 
 architecture TrigArch of TrigCircuit is
 
-type shift_register is array (0 to 4096) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter.
+type shift_register is array (0 to 4) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter. 4096
 
 constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
 constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
@@ -129,13 +129,17 @@ begin
 --    NN <= to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
         
      
-    Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K) is
-        variable ticks          : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
-        variable millisecs      : unsigned (9 downto 0);  -- have to have at least the same size as T
-        variable step_counter   : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
+    Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, TRIGGER) is
+        variable ticks                  : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
+        variable millisecs              : unsigned (9 downto 0);  -- have to have at least the same size as T
+        variable step_counter           : unsigned (11 downto 0);  -- have to have size>=n+N
+        variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
+        variable SIGWIN_old, BGWIN_old  : unsigned (15 downto 0);
+        variable T_old                  : unsigned (9 downto 0);
+        variable K_old                  : unsigned (7 downto 0);
     begin
     
-        if EMIN'event or EMAX'event or SIGWIN'event or BGWIN'event or T'event or K'event or TRIGGER = '1' then
+        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or TRIGGER = '1' then
             ticks := 0;
             millisecs := 0;
             step_counter := 0;
@@ -145,7 +149,7 @@ begin
             sbreset <= not sbreset;
         end if;
     
-        if rising_edge (CLK) then
+        if rising_edge(CLK) then
             ticks := ticks + 1;
            
             if EMIN < PH and EMAX > PH then  -- filter based on the energy
@@ -159,7 +163,7 @@ begin
             
             if millisecs = T then
                 stack(0) <=  counter;
-                for i in 4096 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
+                for i in 4 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
 	                stack(i) <= stack(i-1);
                 end loop;
                 step_counter := step_counter + 1;
@@ -172,6 +176,14 @@ begin
             end if;
              
         end if;
+        
+        EMIN_old    := EMIN;
+        EMAX_old    := EMAX;
+        SIGWIN_old  := SIGWIN;
+        BGWIN_old   := BGWIN;
+        T_old       := T;
+        K_old       := K;
+        
     end process Clk_Proc;
      
      
@@ -188,10 +200,10 @@ begin
             accumulated_background := 0; 
         end if;
         
-        n := SIGWIN / T;
-        NN := BGWIN / T;
-        accumulated_signal <= accumulated_signal + stack(0) - stack(n);  
-        accumulated_background <= accumulated_background + stack(n) - stack(n+NN);
+        n := to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);
+        NN := to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
+        accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
+        accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         S <= accumulated_signal / n;
         B <= accumulated_background / NN;
         
