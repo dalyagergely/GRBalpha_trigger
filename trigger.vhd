@@ -65,6 +65,7 @@ signal stackfull    : std_logic := '0';
 signal sbreset      : std_logic := '0';
 signal comp1        : std_logic := '0';
 signal comp2        : std_logic := '0';
+signal trigback     : std_logic := '0';
 
 begin
 
@@ -129,7 +130,7 @@ begin
 --    NN <= to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
         
      
-    Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, TRIGGER) is
+    Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, trigback) is
         variable ticks                  : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
         variable millisecs              : unsigned (9 downto 0);  -- have to have at least the same size as T
         variable step_counter           : unsigned (11 downto 0);  -- have to have size>=n+N
@@ -139,7 +140,7 @@ begin
         variable K_old                  : unsigned (7 downto 0);
     begin
     
-        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or TRIGGER = '1' then
+        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
             ticks := 0;
             millisecs := 0;
             step_counter := 0;
@@ -172,7 +173,7 @@ begin
             end if;   
             
             if step_counter = (SIGWIN/T) + (BGWIN/T) then   -- Stack full check: step_counter = n+NN
-                stackfull <= '1';
+               -- stackfull <= '1';
             end if;
              
         end if;
@@ -237,8 +238,10 @@ begin
     begin
         if (comp1 = '1' and comp2 = '1' and CLEAR = '0' and stackfull = '1') then
             TRIGGER <= '1';
+            trigback <= '1';
         else
             TRIGGER <= '0';
+            trigback <= '0';
         end if;
     end process Triggering;
 
