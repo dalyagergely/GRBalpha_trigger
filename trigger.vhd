@@ -62,6 +62,7 @@ signal S            : unsigned (19 downto 0);
 signal B            : unsigned (19 downto 0);
 
 signal stackfull    : std_logic := '0';
+signal sbreset      : std_logic := '0';
 signal comp1        : std_logic := '0';
 signal comp2        : std_logic := '0';
 
@@ -122,16 +123,6 @@ begin
         
         
 -- I think that whenever we change one of the inputs of [EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE], the stack should reset, to avoid some strange unwanted behaviour due to leftover count numbers somewhere, so:
-
---    Reset_After_Change : process (EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE) is
---    begin
---        counter <= 0;
---        stack <= (others => 0);  
---        stackfull <= '0';
---        step_counter <= 0;
---        accumulated_signal <= 0;
---        accumulated_background <= 0;
---    end process Reset_After_Change;
         
         
 --    n  <= to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);  -- had problems with "=" operator - fg
@@ -150,6 +141,8 @@ begin
             step_counter := 0;
             stackfull <= '0';
             stack <= (others => 0);
+            counter <= 0;
+            sbreset <= not sbreset;
         end if;
     
         if rising_edge (CLK) then
@@ -185,16 +178,23 @@ begin
 
     
      
-    S_And_B_Accumulation : process (stack) is
+    S_And_B_Accumulation : process (stack, sbreset) is
         Variable n, NN      : unsigned (10 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0);
     begin
+    
+        if sbreset'event then
+            accumulated_signal := 0;
+            accumulated_background := 0; 
+        end if;
+        
         n := SIGWIN / T;
         NN := BGWIN / T;
         accumulated_signal <= accumulated_signal + stack(0) - stack(n);  
         accumulated_background <= accumulated_background + stack(n) - stack(n+NN);
         S <= accumulated_signal / n;
         B <= accumulated_background / NN;
+        
     end process S_And_B_Accumulation;
      
      
