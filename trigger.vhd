@@ -10,26 +10,26 @@ use ieee.math_real.all;
 
 entity TrigCircuit is
     port (
-        EMIN_CHOOSE         : in std_logic_vector (7 downto 0);  
-        EMAX_CHOOSE         : in std_logic_vector (7 downto 0);
-        T_CHOOSE            : in std_logic_vector (2 downto 0);
+        EMIN_CHOOSE         : inout std_logic_vector (7 downto 0);  
+        EMAX_CHOOSE         : inout std_logic_vector (7 downto 0);
+        T_CHOOSE            : inout std_logic_vector (2 downto 0);
         -- T is the integration time of the counter before the stack
-        K_CHOOSE            : in std_logic_vector (7 downto 0);
+        K_CHOOSE            : inout unsigned (7 downto 0);
         -- K is the multiplicator for the background i.e. we compare (S-B)^2 to K*B
-        WIN_CHOOSE          : in std_logic_vector (3 downto 0);
+        WIN_CHOOSE          : inout std_logic_vector (3 downto 0);
         -- Choose the time window for signal and background accumulation
         PH                  : in std_logic_vector (11 downto 0);
         -- The output of the gamma detector is 12 bit ADC data
         CLK                 : in std_logic;
         CLEAR               : in std_logic := '0';
         -- if CLEAR='1', it clears the GRB flag output (i.e. TRIGGER)       
-        TRIGGER             : out std_logic;
+        TRIGGER             : out std_logic
         -- either '1': there is a GRB, or '0': there is no GRB
-        EMIN_OUT            : out std_logic_vector (7 downto 0);
-        EMAX_OUT            : out std_logic_vector (7 downto 0);
-        T_OUT               : out std_logic_vector (2 downto 0);
-        K_OUT               : out std_logic_vector (7 downto 0);
-        WIN_OUT             : out std_logic_vector (3 downto 0)
+--        EMIN_OUT            : out std_logic_vector (7 downto 0);
+--        EMAX_OUT            : out std_logic_vector (7 downto 0);
+--        T_OUT               : out std_logic_vector (2 downto 0);
+--        K_OUT               : out std_logic_vector (7 downto 0);
+--        WIN_OUT             : out std_logic_vector (3 downto 0)
     );
 end TrigCircuit;
 
@@ -114,13 +114,13 @@ begin
 --    with EMAX_CHOOSE select
 --        EMAX <= ... 
         
-    K <= unsigned(K_CHOOSE);
+    K <= K_CHOOSE;
     
-    EMIN_OUT <= EMIN_CHOOSE;
-    EMAX_OUT <= EMAX_CHOOSE;
-    K_OUT    <= K_CHOOSE;
-    T_OUT    <= T_CHOOSE;
-    WIN_OUT  <= WIN_CHOOSE;
+--    EMIN_OUT <= EMIN_CHOOSE;
+--    EMAX_OUT <= EMAX_CHOOSE;
+--    K_OUT    <= K_CHOOSE;
+--    T_OUT    <= T_CHOOSE;
+--    WIN_OUT  <= WIN_CHOOSE;
         
         
 -- I think that whenever we change one of the inputs of [EMIN_CHOOSE, EMAX_CHOOSE, T_CHOOSE, K_CHOOSE, WIN_CHOOSE], the stack should reset, to avoid some strange unwanted behaviour due to leftover count numbers somewhere, so:
@@ -131,9 +131,9 @@ begin
         
      
     Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, trigback) is
-        variable ticks                  : unsigned (7 downto 0);  -- for size we should know CLK_FREQ_MHZ
-        variable millisecs              : unsigned (9 downto 0);  -- have to have at least the same size as T
-        variable step_counter           : unsigned (11 downto 0);  -- have to have size>=n+N
+        variable ticks                  : unsigned (7 downto 0) := 0;  -- for size we should know CLK_FREQ_MHZ
+        variable millisecs              : unsigned (9 downto 0) := 0;  -- have to have at least the same size as T
+        variable step_counter           : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
         variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
         variable SIGWIN_old, BGWIN_old  : unsigned (15 downto 0);
         variable T_old                  : unsigned (9 downto 0);
@@ -173,7 +173,7 @@ begin
             end if;   
             
             if step_counter = (SIGWIN/T) + (BGWIN/T) then   -- Stack full check: step_counter = n+NN
-               -- stackfull <= '1';
+                --stackfull <= '1';
             end if;
              
         end if;
@@ -193,7 +193,7 @@ begin
      
     S_And_B_Accumulation : process (stack, sbreset) is
         Variable n, NN      : unsigned (10 downto 0);
-        Variable accumulated_signal, accumulated_background : unsigned (19 downto 0);
+        Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := 0;
     begin
     
         if sbreset'event then
