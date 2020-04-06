@@ -50,7 +50,7 @@ signal BGWIN        : unsigned (15 downto 0);
 signal K            : unsigned (7 downto 0);
 signal counter      : unsigned (13 downto 0);
 
-signal stack : shift_register := (others => 0);
+signal stack : shift_register := (others => to_unsigned(0, 14));
 
 -- variables cannot be declared here, also the compiler isn't case sensitive, so I changed N to NN  - fg
 --signal accumulated_signal         : unsigned (19 downto 0);
@@ -70,34 +70,49 @@ signal trigback     : std_logic := '0';
 begin
 
     with T_CHOOSE select 
-        T <= 32     when "000",
-             64     when "001",
-             128    when "010",
-             256    when "011",
-             512    when "100",
-             1024   when "101",
-             1024   when others;
+        T <= to_unsigned(32, 10)     when "000",
+             to_unsigned(64, 10)     when "001",
+             to_unsigned(128, 10)    when "010",
+             to_unsigned(256, 10)    when "011",
+             to_unsigned(512, 10)    when "100",
+             to_unsigned(1024, 10)   when "101",
+             to_unsigned(1024, 10)   when others;
              
+--    with WIN_CHOOSE select  -- signal windows in ms
+--        SIGWIN <= 32    when "0000",
+--                  64    when "0001",
+--                  128   when "0010",
+--                  256   when "0011",
+--                  512   when "0100",
+--                  1024  when "0101",
+--                  2048  when "0110",
+--                  4096  when "0111",
+--                  8192  when "1000",
+--                  16384 when "1001",
+--                  32768 when "1010",
+--                  65536 when "1011",
+--                  65536 when others;
+
     with WIN_CHOOSE select  -- signal windows in ms
-        SIGWIN <= 32    when "0000",
-                  64    when "0001",
-                  128   when "0010",
-                  256   when "0011",
-                  512   when "0100",
-                  1024  when "0101",
-                  2048  when "0110",
-                  4096  when "0111",
-                  8192  when "1000",
-                  16384 when "1001",
-                  32768 when "1010",
-                  65536 when "1011",
-                  65536 when others;
+        SIGWIN <= x"0020"    when "0000",
+                  x"0040"    when "0001",
+                  x"0080"   when "0010",
+                  x"0100"   when "0011",
+                  x"0200"   when "0100",
+                  x"0400"  when "0101",
+                  x"0800"  when "0110",
+                  x"1000"  when "0111",
+                  x"2000"  when "1000",
+                  x"4000" when "1001",
+                  x"8000" when "1010",
+                  to_unsigned(65536, 16) when "1011",
+                  to_unsigned(65536, 16) when others;
                   
     with WIN_CHOOSE select  -- background windows in ms
-        BGWIN <= 16384  when "0000" | "0001" | "0010" | "0011" | "0100",
-                 32768  when "0101" | "0110" | "0111",
-                 65536  when "1000" | "1001" | "1010" | "1011",
-                 65536  when others;
+        BGWIN <= x"4000"  when "0000" | "0001" | "0010" | "0011" | "0100",
+                 x"8000"  when "0101" | "0110" | "0111",
+                 to_unsigned(65536, 16)  when "1000" | "1001" | "1010" | "1011",
+                 to_unsigned(65536, 16)  when others;
 
 -- So we have integration time options of 32-1024 ms, signal time windows of 32-65536 ms and 
 -- background time windows of 16384-65536 ms. In this case the possible values of n are between 
@@ -131,26 +146,39 @@ begin
         
      
     Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, trigback) is
-        variable ticks                  : unsigned (7 downto 0) := 0;  -- for size we should know CLK_FREQ_MHZ
-        variable millisecs              : unsigned (9 downto 0) := 0;  -- have to have at least the same size as T
-        variable step_counter           : unsigned (11 downto 0) := 0;  -- have to have size>=n+N
+        variable ticks                  : unsigned (7 downto 0) := to_unsigned(0, 8);  -- for size we should know CLK_FREQ_MHZ
+        variable millisecs              : unsigned (9 downto 0) := to_unsigned(0, 10);  -- have to have at least the same size as T
+        variable step_counter           : unsigned (11 downto 0) := to_unsigned(0, 12);  -- have to have size>=n+N
         variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
         variable SIGWIN_old, BGWIN_old  : unsigned (15 downto 0);
         variable T_old                  : unsigned (9 downto 0);
         variable K_old                  : unsigned (7 downto 0);
     begin
     
-        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
-            ticks := 0;
-            millisecs := 0;
-            step_counter := 0;
-            stackfull <= '0';
-            stack <= (others => 0);
-            counter <= 0;
-            sbreset <= not sbreset;
-        end if;
+--        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
+--            ticks := to_unsigned(0, 8);
+--            millisecs := to_unsigned(0, 10);
+--            step_counter := to_unsigned(0, 12);
+--            stackfull <= '0';
+--            stack <= (others => to_unsigned(0, 14));
+--            counter <= to_unsigned(0, 14);
+--            sbreset <= not sbreset;
+--        end if;
     
         if rising_edge(CLK) then
+
+	    if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
+            	ticks := to_unsigned(0, 8);
+            	millisecs := to_unsigned(0, 10);
+            	step_counter := to_unsigned(0, 12);
+            	stackfull <= '0';
+            	stack <= (others => to_unsigned(0, 14));
+            	counter <= to_unsigned(0, 14);
+            	--sbreset <= not sbreset;
+		sbreset <= '1';
+	    end if;
+
+
             ticks := ticks + 1;
            
             if EMIN < PH and EMAX > PH then  -- filter based on the energy
@@ -158,7 +186,7 @@ begin
             end if;
            
             if ticks = CLK_FREQ_MHZ - 1 then  -- count the milliseconds based on clk frequency
-                ticks := 0;
+                ticks := to_unsigned(0, 8);
                 millisecs := millisecs + 1;
             end if;   
             
@@ -168,12 +196,12 @@ begin
 	                stack(i) <= stack(i-1);
                 end loop;
                 step_counter := step_counter + 1;
-                millisecs := 0;
-                counter <= 0;
+                millisecs := to_unsigned(0, 10);
+                counter <= to_unsigned(0, 14);
             end if;   
             
             if step_counter = (SIGWIN/T) + (BGWIN/T) then   -- Stack full check: step_counter = n+NN
-                --stackfull <= '1';
+                stackfull <= '1';
             end if;
              
         end if;
@@ -193,12 +221,12 @@ begin
      
     S_And_B_Accumulation : process (stack, sbreset) is
         Variable n, NN      : unsigned (10 downto 0);
-        Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := 0;
+        Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
-        if sbreset'event then
-            accumulated_signal := 0;
-            accumulated_background := 0; 
+        if sbreset = '1' then
+            accumulated_signal := to_unsigned(0, 20);
+            accumulated_background := to_unsigned(0, 20); 
         end if;
         
         n := to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);
