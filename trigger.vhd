@@ -1,5 +1,5 @@
 -- GRBalpha trigger algorithm
--- Written by Gergely Dálya, 2020
+-- Written by Gergely Dálya and Gergely Friss, 2020
 -- dalyag@caesar.elte.hu
 
 library IEEE;
@@ -39,8 +39,9 @@ architecture TrigArch of TrigCircuit is
 
 type shift_register is array (0 to 4) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter. 4096
 
-constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
-constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
+--constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
+--constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
+constant CLK_FREQ_KHZ   : integer := 12000;
 
 signal EMIN         : std_logic_vector (15 downto 0);
 signal EMAX         : std_logic_vector (15 downto 0);
@@ -146,7 +147,7 @@ begin
         
      
     Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, trigback) is
-        variable ticks                  : unsigned (7 downto 0) := to_unsigned(0, 8);  -- for size we should know CLK_FREQ_MHZ
+        variable ticks                  : unsigned (13 downto 0) := to_unsigned(0, 14);  -- for size we should know CLK_FREQ_MHZ
         variable millisecs              : unsigned (9 downto 0) := to_unsigned(0, 10);  -- have to have at least the same size as T
         variable step_counter           : unsigned (11 downto 0) := to_unsigned(0, 12);  -- have to have size>=n+N
         variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
@@ -168,7 +169,7 @@ begin
         if rising_edge(CLK) then
 
 	    if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
-            	ticks := to_unsigned(0, 8);
+            	ticks := to_unsigned(0, 14);
             	millisecs := to_unsigned(0, 10);
             	step_counter := to_unsigned(0, 12);
             	stackfull <= '0';
@@ -186,7 +187,7 @@ begin
             end if;
            
             if ticks = CLK_FREQ_MHZ - 1 then  -- count the milliseconds based on clk frequency
-                ticks := to_unsigned(0, 8);
+                ticks := to_unsigned(0, 14);
                 millisecs := millisecs + 1;
             end if;   
             
@@ -272,7 +273,6 @@ begin
             trigback <= '0';
         end if;
     end process Triggering;
-
 
 
 end TrigArch;
