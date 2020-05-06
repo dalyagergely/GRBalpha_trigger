@@ -37,10 +37,10 @@ end TrigCircuit;
 
 architecture TrigArch of TrigCircuit is
 
-type shift_register is array (0 to 4) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter. 4096
+type shift_register is array (0 to 4095) of unsigned (13 downto 0); -- array size is the max possible value of n+N+1. Each element have to have the same size as counter. 4096
 
 --constant CLK_TIME_MS    : integer := 10; -- what is the clock frequency for our FPGA?
---constant CLK_FREQ_MHZ   : integer := 1/CLK_TIME_MS;
+--constant CLK_FREQ_KHZ   : integer := 1/CLK_TIME_MS;
 constant CLK_FREQ_KHZ   : integer := 12000;
 
 signal EMIN         : std_logic_vector (15 downto 0);
@@ -147,7 +147,7 @@ begin
         
      
     Clk_Proc : process (CLK, EMIN, EMAX, SIGWIN, BGWIN, T, K, trigback) is
-        variable ticks                  : unsigned (13 downto 0) := to_unsigned(0, 14);  -- for size we should know CLK_FREQ_MHZ
+        variable ticks                  : unsigned (13 downto 0) := to_unsigned(0, 14);  -- for size we should know CLK_FREQ_KHZ
         variable millisecs              : unsigned (9 downto 0) := to_unsigned(0, 10);  -- have to have at least the same size as T
         variable step_counter           : unsigned (11 downto 0) := to_unsigned(0, 12);  -- have to have size>=n+N
         variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
@@ -186,14 +186,14 @@ begin
                 counter <= counter + 1;
             end if;
            
-            if ticks = CLK_FREQ_MHZ - 1 then  -- count the milliseconds based on clk frequency
+            if ticks = CLK_FREQ_KHZ - 1 then  -- count the milliseconds based on clk frequency
                 ticks := to_unsigned(0, 14);
                 millisecs := millisecs + 1;
             end if;   
             
             if millisecs = T then
                 stack(0) <=  counter;
-                for i in 4 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
+                for i in 4095 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
 	                stack(i) <= stack(i-1);
                 end loop;
                 step_counter := step_counter + 1;

@@ -1,0 +1,146 @@
+* ******************************************************************************
+
+* iCEcube Report
+
+* Version:            2017.08.27940
+
+* Build Date:         Sep 12 2017 08:02:28
+
+* File Generated:     May 5 2020 23:45:31
+
+* Purpose:            General info of design implementation
+
+* Copyright (C) 2006-2010 by Lattice Semiconductor Corp. All rights reserved.
+
+* ******************************************************************************
+
+Synthesis/Placement Summary:
+----------------------------
+    Status:  Successful
+    Runtime: 1 seconds
+
+Device Info:
+------------
+    Device Family: iCE40
+    Device:        iCE40HX8K
+    Package:       CM225
+
+Design statistics:
+------------------
+    FFs:                  0
+    LUTs:                 161
+    RAMs:                 0
+    IOBs:                 60
+    GBs:                  0
+    PLLs:                 0
+    Warm Boots:           0
+
+Logic Resource Utilization:
+---------------------------
+    Total Logic Cells: 179/7680
+        Combinational Logic Cells: 179      out of   7680      2.33073%
+        Sequential Logic Cells:    0        out of   7680      0%
+        Logic Tiles:               33       out of   960       3.4375%
+    Registers: 
+        Logic Registers:           0        out of   7680      0%
+        IO Registers:              0        out of   1280      0
+    Block RAMs:                    0        out of   32        0%
+    Warm Boots:                    0        out of   1         0%
+    Pins:
+        Input Pins:                59       out of   178       33.1461%
+        Output Pins:               1        out of   178       0.561798%
+        InOut Pins:                0        out of   178       0%
+    Global Buffers:                0        out of   8         0%
+    PLLs:                          0        out of   2         0%
+
+IO Bank Utilization:
+--------------------
+    Bank 3: 45       out of   46        97.8261%
+    Bank 1: 0        out of   42        0%
+    Bank 0: 15       out of   46        32.6087%
+    Bank 2: 0        out of   44        0%
+
+Detailed I/O Info:
+------------------
+    Input Pins: 
+    Pin Number  Direction  IO Standard  Pull Up  IO Bank  IO Function    Signal Name    
+    ----------  ---------  -----------  -------  -------  -----------    -----------    
+    A1          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[1]   
+    A2          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[5]   
+    A5          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[39]  
+    B1          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[23]  
+    B2          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[3]   
+    B3          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[7]   
+    B4          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[14]  
+    B5          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[38]  
+    B6          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[35]  
+    C1          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[31]  
+    C2          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[13]  
+    C3          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[2]   
+    C4          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[4]   
+    C5          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[15]  
+    D1          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[27]  
+    D2          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[26]  
+    D3          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[29]  
+    D4          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[21]  
+    D5          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[6]   
+    D6          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[36]  
+    D7          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[34]  
+    E2          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[8]   
+    E3          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[20]  
+    E4          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[22]  
+    E5          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[30]  
+    E6          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[28]  
+    F1          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[10]  
+    F2          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[24]  
+    F3          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[25]  
+    F4          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[32]  
+    F5          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[33]  
+    F7          Input      SB_LVCMOS    No       0        Simple Input   THRESHOLD[37]  
+    G1          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[19]  
+    G3          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[12]  
+    G4          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[11]  
+    G5          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[18]  
+    H1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[11]   
+    H2          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[17]  
+    H3          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[16]   
+    H4          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[18]   
+    H5          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[12]   
+    H6          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[16]  
+    J1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[19]   
+    J3          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[17]   
+    J4          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[15]   
+    J5          Input      SB_LVCMOS    No       3        Simple Input   THRESHOLD[9]   
+    K1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[13]   
+    K3          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[14]   
+    K4          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[7]    
+    K5          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[5]    
+    L1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[10]   
+    L3          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[9]    
+    L4          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[1]    
+    M1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[0]    
+    M2          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[4]    
+    M3          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[6]    
+    M4          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[8]    
+    N2          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[3]    
+    P1          Input      SB_LVCMOS    No       3        Simple Input   INSIGNAL[2]    
+
+    Output Pins: 
+    Pin Number  Direction  IO Standard  Pull Up  IO Bank  IO Function    Signal Name    
+    ----------  ---------  -----------  -------  -------  -----------    -----------    
+    J2          Output     SB_LVCMOS    No       3        Simple Output  OUTSIGNAL      
+
+
+
+Router Summary:
+---------------
+    Status:  Successful
+    Runtime: 16 seconds
+
+Routing Resource Utilization:
+-----------------------------
+              Local line of tile     1313 out of 146184      0.898183%
+                          Span 4      275 out of  29696      0.926051%
+                         Span 12       82 out of   5632      1.45597%
+      Vertical Inter-LUT Connect       40 out of   6720      0.595238%
+
