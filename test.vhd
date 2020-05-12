@@ -21,17 +21,18 @@ end TestCircuit;
 architecture TestArch of TestCircuit is
 
 
---function Log2( input:integer ) return integer is
---	variable temp,log:integer;
---	begin
---	  temp:=input;
---	  log:=0;
---	  while (temp /= 0) loop
---	   temp:=temp/2;
---	   log:=log+1;
---	   end loop;
---	   return log;
---	end function log2;
+function Log2( input:unsigned ) return unsigned is
+	variable temp:unsigned (19 downto 0);
+	variable log:unsigned (19 downto 0);
+	begin
+		temp := input;
+		log := 0;
+		while (temp /= 0) loop
+			temp := temp/2;
+			log := log+1;
+		end loop;
+	return log;
+end function log2;
 
 begin
 
@@ -74,16 +75,70 @@ begin
 --		end if;
 --	end process Square_Proc_A;
 
+
+	Square_Proc_log : process (INSIGNAL) is
+		variable n : unsigned (39 downto 0) := 0;
+	begin
+		n := shift_left(unsigned("00000000000000000000" & INSIGNAL), to_integer(Log2(unsigned(INSIGNAL))));
+		if n > unsigned(INSIGNAL) then
+			OUTSIGNAL <= '1';
+		else
+			OUTSIGNAL <= '0';
+		end if;		
+	end process Square_Proc_log;
+
 	
 
 --	Square_Proc_B : process (INSIGNAL) is  -- Cast of incompatible types
+--		variable n : unsigned (39 downto 0) := 0;
 --	begin
---		if (unsigned(Log2(integer(INSIGNAL))) > unsigned(THRESHOLD)) then
---			OUTSIGNAL <= '1';
+--		if (Log2(unsigned(INSIGNAL)) > 19) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 19);
+--		elsif (Log2(unsigned(INSIGNAL)) > 18) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 18);
+--		elsif (Log2(unsigned(INSIGNAL)) > 17) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 17);
+--		elsif (Log2(unsigned(INSIGNAL)) > 16) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 16);
+--		elsif (Log2(unsigned(INSIGNAL)) > 15) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 15);
+--		elsif (Log2(unsigned(INSIGNAL)) > 14) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 14);
+--		elsif (Log2(unsigned(INSIGNAL)) > 13) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 13);
+--		elsif (Log2(unsigned(INSIGNAL)) > 12) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 12);
+--		elsif (Log2(unsigned(INSIGNAL)) > 11) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 11);
+--		elsif (Log2(unsigned(INSIGNAL)) > 10) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 10);
+--		elsif (Log2(unsigned(INSIGNAL)) > 9) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 9);
+--		elsif (Log2(unsigned(INSIGNAL)) > 8) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 8);
+--		elsif (Log2(unsigned(INSIGNAL)) > 7) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 7);
+--		elsif (Log2(unsigned(INSIGNAL)) > 6) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 6);
+--		elsif (Log2(unsigned(INSIGNAL)) > 5) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 5);
+--		elsif (Log2(unsigned(INSIGNAL)) > 4) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 4);
+--		elsif (Log2(unsigned(INSIGNAL)) > 3) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 3);
+--		elsif (Log2(unsigned(INSIGNAL)) > 2) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 2);
+--		elsif (Log2(unsigned(INSIGNAL)) > 1) then
+--			n := shift_left(unsigned("00000000000000000000" & INSIGNAL), 1);
+--		end if;
+--		
+--		if (n > unsigned(THRESHOLD)) then
+--   		OUTSIGNAL <= '1';
 --		else
 --			OUTSIGNAL <= '0';
---		end if;
+--   	end if;
 --	end process Square_Proc_B;
+
 
 
 
@@ -142,59 +197,59 @@ begin
 --	end process Square_Proc_C;
 	
 	
-	Square_Proc_D : process (INSIGNAL) is
-		variable n : unsigned (39 downto 0);
-    begin
-    	if (unsigned(INSIGNAL) > 1048575) then
-    		n := 1099511627776;
-    	elsif (unsigned(INSIGNAL) > 524287) then
-    		n := 274877906944;
-    	elsif (unsigned(INSIGNAL) > 262143) then
-    		n := 68719476736;
-    	elsif (unsigned(INSIGNAL) > 131071) then
-    		n := 17179869184;
-    	elsif (unsigned(INSIGNAL) > 65535) then
-			n := 4294967296;
-    	elsif (unsigned(INSIGNAL) > 32767) then
-    		n := 1073741824;
-    	elsif (unsigned(INSIGNAL) > 16383) then
-    		n := 268435456;
-    	elsif (unsigned(INSIGNAL) > 8191) then
-   			n := 67108864;
-    	elsif (unsigned(INSIGNAL) > 4095) then
-    		n := 16777216;
-    	elsif (unsigned(INSIGNAL) > 2047) then
-    		n := 4194304;
-    	elsif (unsigned(INSIGNAL) > 1023) then
-    		n := 1048576;
-    	elsif (unsigned(INSIGNAL) > 511) then
-    		n := 262144;
-    	elsif (unsigned(INSIGNAL) > 255) then
-    		n := 65536;
-    	elsif (unsigned(INSIGNAL) > 127) then
-    		n := 16384;
-    	elsif (unsigned(INSIGNAL) > 63) then
-    		n := 4096;
-    	elsif (unsigned(INSIGNAL) > 31) then
-    		n := 1024;
-    	elsif (unsigned(INSIGNAL) > 15) then
-    		n := 256;
-    	elsif (unsigned(INSIGNAL) > 7) then
-    		n := 64;
-    	elsif (unsigned(INSIGNAL) > 3) then
-    		n := 16;
-    	elsif (unsigned(INSIGNAL) > 1) then
-    		n := 4;
-    	else
-    		n := 2;   	
-    	end if;
-    	
-    	if (n > unsigned(THRESHOLD)) then
-    		OUTSIGNAL <= '1';
-		else
-			OUTSIGNAL <= '0';
-    	end if;
-	end process Square_Proc_D;
+--	Square_Proc_D : process (INSIGNAL) is
+--		variable n : unsigned (39 downto 0);
+--   begin
+--    	if (unsigned(INSIGNAL) > 1048575) then
+--    		n := 1099511627776;
+--    	elsif (unsigned(INSIGNAL) > 524287) then
+--    		n := 274877906944;
+--    	elsif (unsigned(INSIGNAL) > 262143) then
+--    		n := 68719476736;
+--    	elsif (unsigned(INSIGNAL) > 131071) then
+--    		n := 17179869184;
+--    	elsif (unsigned(INSIGNAL) > 65535) then
+--			n := 4294967296;
+--    	elsif (unsigned(INSIGNAL) > 32767) then
+--    		n := 1073741824;
+--    	elsif (unsigned(INSIGNAL) > 16383) then
+--    		n := 268435456;
+--    	elsif (unsigned(INSIGNAL) > 8191) then
+--   			n := 67108864;
+--    	elsif (unsigned(INSIGNAL) > 4095) then
+--    		n := 16777216;
+--    	elsif (unsigned(INSIGNAL) > 2047) then
+--    		n := 4194304;
+--    	elsif (unsigned(INSIGNAL) > 1023) then
+--    		n := 1048576;
+--    	elsif (unsigned(INSIGNAL) > 511) then
+--    		n := 262144;
+--    	elsif (unsigned(INSIGNAL) > 255) then
+--    		n := 65536;
+--    	elsif (unsigned(INSIGNAL) > 127) then
+--    		n := 16384;
+--    	elsif (unsigned(INSIGNAL) > 63) then
+--    		n := 4096;
+--    	elsif (unsigned(INSIGNAL) > 31) then
+--    		n := 1024;
+--    	elsif (unsigned(INSIGNAL) > 15) then
+--    		n := 256;
+--    	elsif (unsigned(INSIGNAL) > 7) then
+--    		n := 64;
+--    	elsif (unsigned(INSIGNAL) > 3) then
+--    		n := 16;
+--    	elsif (unsigned(INSIGNAL) > 1) then
+--    		n := 4;
+--    	else
+--    		n := 2;   	
+--    	end if;
+--    	
+--    	if (n > unsigned(THRESHOLD)) then
+--    		OUTSIGNAL <= '1';
+--		else
+--			OUTSIGNAL <= '0';
+--    	end if;
+--	end process Square_Proc_D;
 
 
 
