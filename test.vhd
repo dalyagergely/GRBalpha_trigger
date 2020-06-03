@@ -349,205 +349,206 @@ begin
 	Square_Proc_F : process (INSIGNAL) is
 		variable n : unsigned (39 downto 0);
 	begin
-    	if (unsigned(INSIGNAL) > 524288) then
+    	if (unsigned(INSIGNAL) > 999999) then --524288
     		n := 274877906944;
+    		
+    	 elsif (unsigned(INSIGNAL) > 999035) then
+			n := 9913814010;
+		 elsif (unsigned(INSIGNAL) > 982851) then
+			n := 9871852532;
+		 elsif (unsigned(INSIGNAL) > 981482) then
+			n := 9804330019;
+		 elsif (unsigned(INSIGNAL) > 966424) then
+			n := 9611849937;
+		 elsif (unsigned(INSIGNAL) > 944351) then
+			n := 9537879160;
+		 elsif (unsigned(INSIGNAL) > 912953) then
+			n := 9461610371;
+		 elsif (unsigned(INSIGNAL) > 912688) then
+			n := 9410556041;
+		 elsif (unsigned(INSIGNAL) > 912196) then
+			n := 9379216285;
+		 elsif (unsigned(INSIGNAL) > 906135) then
+			n := 9286315049;
+		 elsif (unsigned(INSIGNAL) > 904892) then
+			n := 9253996868;
+		 elsif (unsigned(INSIGNAL) > 896952) then
+			n := 9250906526;
+		 elsif (unsigned(INSIGNAL) > 894552) then
+			n := 9235756888;
+		 elsif (unsigned(INSIGNAL) > 893886) then
+			n := 9179701751;
+		 elsif (unsigned(INSIGNAL) > 873653) then
+			n := 9054312453;
+		 elsif (unsigned(INSIGNAL) > 867541) then
+			n := 9018165296;
+		 elsif (unsigned(INSIGNAL) > 862289) then
+			n := 8910421837;
+		 elsif (unsigned(INSIGNAL) > 848557) then
+			n := 8894339503;
+		 elsif (unsigned(INSIGNAL) > 839061) then
+			n := 8751671859;
+		 elsif (unsigned(INSIGNAL) > 829441) then
+			n := 8725916970;
+		 elsif (unsigned(INSIGNAL) > 825724) then
+			n := 8578000643;
+		 elsif (unsigned(INSIGNAL) > 821129) then
+			n := 8562644650;
+		 elsif (unsigned(INSIGNAL) > 803513) then
+			n := 8317141692;
+		 elsif (unsigned(INSIGNAL) > 803476) then
+			n := 8055083446;
+		 elsif (unsigned(INSIGNAL) > 789926) then
+			n := 7982177929;
+		 elsif (unsigned(INSIGNAL) > 782348) then
+			n := 7928795054;
+		 elsif (unsigned(INSIGNAL) > 770704) then
+			n := 7657668274;
+		 elsif (unsigned(INSIGNAL) > 766928) then
+			n := 7256276878;
+		 elsif (unsigned(INSIGNAL) > 753978) then
+			n := 7222935207;
+		 elsif (unsigned(INSIGNAL) > 749670) then
+			n := 7086657408;
+		 elsif (unsigned(INSIGNAL) > 747894) then
+			n := 6995040390;
+		 elsif (unsigned(INSIGNAL) > 727960) then
+			n := 6928318485;
+		 elsif (unsigned(INSIGNAL) > 726375) then
+			n := 6896651768;
+		 elsif (unsigned(INSIGNAL) > 726125) then
+			n := 6822379281;
+		 elsif (unsigned(INSIGNAL) > 721242) then
+			n := 6778667507;
+		 elsif (unsigned(INSIGNAL) > 719833) then
+			n := 6742973520;
+		 elsif (unsigned(INSIGNAL) > 713975) then
+			n := 6541879748;
+		 elsif (unsigned(INSIGNAL) > 707644) then
+			n := 6539172682;
+		 elsif (unsigned(INSIGNAL) > 701577) then
+			n := 6442183870;
+		 elsif (unsigned(INSIGNAL) > 686666) then
+			n := 6381624176;
+		 elsif (unsigned(INSIGNAL) > 678485) then
+			n := 6256171393;
+		 elsif (unsigned(INSIGNAL) > 676938) then
+			n := 6183696389;
+		 elsif (unsigned(INSIGNAL) > 668754) then
+			n := 6056368880;
+		 elsif (unsigned(INSIGNAL) > 646702) then
+			n := 5985654468;
+		 elsif (unsigned(INSIGNAL) > 641628) then
+			n := 5849305861;
+		 elsif (unsigned(INSIGNAL) > 638640) then
+			n := 5583816050;
+		 elsif (unsigned(INSIGNAL) > 635770) then
+			n := 5438008431;
+		 elsif (unsigned(INSIGNAL) > 610752) then
+			n := 5315368894;
+		 elsif (unsigned(INSIGNAL) > 581970) then
+			n := 5110798839;
+		 elsif (unsigned(INSIGNAL) > 580367) then
+			n := 5096635673;
+		 elsif (unsigned(INSIGNAL) > 559044) then
+			n := 5093915977;
+		 elsif (unsigned(INSIGNAL) > 546044) then
+			n := 5017599682;
+		 elsif (unsigned(INSIGNAL) > 544976) then
+			n := 5011119098;
+		 elsif (unsigned(INSIGNAL) > 543370) then
+			n := 4890637806;
+		 elsif (unsigned(INSIGNAL) > 535302) then
+			n := 4866896153;
+		 elsif (unsigned(INSIGNAL) > 510787) then
+			n := 4843489355;
+		 elsif (unsigned(INSIGNAL) > 506129) then
+			n := 4827121923;
+		 elsif (unsigned(INSIGNAL) > 499708) then
+			n := 4807515914;
+		 elsif (unsigned(INSIGNAL) > 490747) then
+			n := 4742208894;
+		 elsif (unsigned(INSIGNAL) > 467562) then
+			n := 4587373797;
+		 elsif (unsigned(INSIGNAL) > 459463) then
+			n := 4543331759;
+		 elsif (unsigned(INSIGNAL) > 458978) then
+			n := 4465967354;
+		 elsif (unsigned(INSIGNAL) > 436400) then
+			n := 4374197336;
+		 elsif (unsigned(INSIGNAL) > 434714) then
+			n := 3708256143;
+		 elsif (unsigned(INSIGNAL) > 423881) then
+			n := 3435523188;
+		 elsif (unsigned(INSIGNAL) > 414119) then
+			n := 3300375060;
+		 elsif (unsigned(INSIGNAL) > 395922) then
+			n := 3232439388;
+		 elsif (unsigned(INSIGNAL) > 376472) then
+			n := 3128472128;
+		 elsif (unsigned(INSIGNAL) > 343788) then
+			n := 3100567928;
+		 elsif (unsigned(INSIGNAL) > 333473) then
+			n := 3048034733;
+		 elsif (unsigned(INSIGNAL) > 323370) then
+			n := 3040327557;
+		 elsif (unsigned(INSIGNAL) > 293618) then
+			n := 3034252307;
+		 elsif (unsigned(INSIGNAL) > 292437) then
+			n := 3028062954;
+		 elsif (unsigned(INSIGNAL) > 285463) then
+			n := 3014585845;
+		 elsif (unsigned(INSIGNAL) > 252189) then
+			n := 2945572321;
+		 elsif (unsigned(INSIGNAL) > 250928) then
+			n := 2752992534;
+		 elsif (unsigned(INSIGNAL) > 249020) then
+			n := 2742166773;
+		 elsif (unsigned(INSIGNAL) > 231888) then
+			n := 2712792884;
+		 elsif (unsigned(INSIGNAL) > 212992) then
+			n := 2436508300;
+		 elsif (unsigned(INSIGNAL) > 185493) then
+			n := 2243202382;
+		 elsif (unsigned(INSIGNAL) > 156539) then
+			n := 1947984893;
+		 elsif (unsigned(INSIGNAL) > 156479) then
+			n := 1680365555;
+		 elsif (unsigned(INSIGNAL) > 140597) then
+			n := 1588002201;
+		 elsif (unsigned(INSIGNAL) > 123925) then
+			n := 1584255982;
+		 elsif (unsigned(INSIGNAL) > 122320) then
+			n := 1563753600;
+		 elsif (unsigned(INSIGNAL) > 118502) then
+			n := 1511339358;
+		 elsif (unsigned(INSIGNAL) > 116592) then
+			n := 1437932423;
+		 elsif (unsigned(INSIGNAL) > 101124) then
+			n := 1281966170;
+		 elsif (unsigned(INSIGNAL) > 84475) then
+			n := 1249665062;
+		 elsif (unsigned(INSIGNAL) > 68460) then
+			n := 975335440;
+		 elsif (unsigned(INSIGNAL) > 67586) then
+			n := 829382579;
+		 elsif (unsigned(INSIGNAL) > 58207) then
+			n := 733570724;
+		 elsif (unsigned(INSIGNAL) > 48191) then
+			n := 723104500;
+		 elsif (unsigned(INSIGNAL) > 35803) then
+			n := 592730128;
+		 elsif (unsigned(INSIGNAL) > 19015) then
+			n := 543316251;
+		 elsif (unsigned(INSIGNAL) > 14372) then
+			n := 508675188;
+		 elsif (unsigned(INSIGNAL) > 12817) then
+			n := 412780979;
+		 elsif (unsigned(INSIGNAL) > 11271) then
+			n := 337011965;
+		 elsif (unsigned(INSIGNAL) > 4813) then
+			n := 83651497;
 
-		 elsif (unsigned(INSIGNAL) > 458982) then
-			n := 210665281602;
-		 elsif (unsigned(INSIGNAL) > 401812) then
-			n := 161452993315;
-		 elsif (unsigned(INSIGNAL) > 351762) then
-			n := 123736900795;
-		 elsif (unsigned(INSIGNAL) > 307947) then
-			n := 94831444769;
-		 elsif (unsigned(INSIGNAL) > 269589) then
-			n := 72678423810;
-		 elsif (unsigned(INSIGNAL) > 236009) then
-			n := 55700440928;
-		 elsif (unsigned(INSIGNAL) > 206612) then
-			n := 42688585649;
-		 elsif (unsigned(INSIGNAL) > 180876) then
-			n := 32716354024;
-		 elsif (unsigned(INSIGNAL) > 158346) then
-			n := 25073677292;
-		 elsif (unsigned(INSIGNAL) > 138623) then
-			n := 19216361715;
-		 elsif (unsigned(INSIGNAL) > 121356) then
-			n := 14727339484;
-		 elsif (unsigned(INSIGNAL) > 106240) then
-			n := 11286971565;
-		 elsif (unsigned(INSIGNAL) > 93006) then
-			n := 8650287939;
-		 elsif (unsigned(INSIGNAL) > 81422) then
-			n := 6629544603;
-		 elsif (unsigned(INSIGNAL) > 71280) then
-			n := 5080855338;
-		 elsif (unsigned(INSIGNAL) > 62401) then
-			n := 3893946343;
-		 elsif (unsigned(INSIGNAL) > 54628) then
-			n := 2984304239;
-		 elsif (unsigned(INSIGNAL) > 47824) then
-			n := 2287158324;
-		 elsif (unsigned(INSIGNAL) > 41867) then
-			n := 1752868601;
-		 elsif (unsigned(INSIGNAL) > 36652) then
-			n := 1343391186;
-		 elsif (unsigned(INSIGNAL) > 32086) then
-			n := 1029569403;
-		 elsif (unsigned(INSIGNAL) > 28090) then
-			n := 789057697;
-		 elsif (unsigned(INSIGNAL) > 24591) then
-			n := 604730528;
-		 elsif (unsigned(INSIGNAL) > 21528) then
-			n := 463462955;
-		 elsif (unsigned(INSIGNAL) > 18846) then
-			n := 355196076;
-		 elsif (unsigned(INSIGNAL) > 16499) then
-			n := 272220791;
-		 elsif (unsigned(INSIGNAL) > 14443) then
-			n := 208628879;
-		 elsif (unsigned(INSIGNAL) > 12644) then
-			n := 159892303;
-		 elsif (unsigned(INSIGNAL) > 11069) then
-			n := 122540794;
-		 elsif (unsigned(INSIGNAL) > 9690) then
-			n := 93914753;
-		 elsif (unsigned(INSIGNAL) > 8483) then
-			n := 71975875;
-		 elsif (unsigned(INSIGNAL) > 7427) then
-			n := 55162010;
-		 elsif (unsigned(INSIGNAL) > 6501) then
-			n := 42275935;
-		 elsif (unsigned(INSIGNAL) > 5692) then
-			n := 32400100;
-		 elsif (unsigned(INSIGNAL) > 4983) then
-			n := 24831301;
-		 elsif (unsigned(INSIGNAL) > 4362) then
-			n := 19030606;
-		 elsif (unsigned(INSIGNAL) > 3819) then
-			n := 14584977;
-		 elsif (unsigned(INSIGNAL) > 3343) then
-			n := 11177865;
-		 elsif (unsigned(INSIGNAL) > 2926) then
-			n := 8566669;
-		 elsif (unsigned(INSIGNAL) > 2562) then
-			n := 6565459;
-		 elsif (unsigned(INSIGNAL) > 2243) then
-			n := 5031741;
-		 elsif (unsigned(INSIGNAL) > 1963) then
-			n := 3856305;
-		 elsif (unsigned(INSIGNAL) > 1719) then
-			n := 2955456;
-		 elsif (unsigned(INSIGNAL) > 1505) then
-			n := 2265049;
-		 elsif (unsigned(INSIGNAL) > 1317) then
-			n := 1735924;
-		 elsif (unsigned(INSIGNAL) > 1153) then
-			n := 1330405;
-		 elsif (unsigned(INSIGNAL) > 1009) then
-			n := 1019617;
-		 elsif (unsigned(INSIGNAL) > 883) then
-			n := 781430;
-		 elsif (unsigned(INSIGNAL) > 773) then
-			n := 598884;
-		 elsif (unsigned(INSIGNAL) > 677) then
-			n := 458982;
-		 elsif (unsigned(INSIGNAL) > 593) then
-			n := 351762;
-		 elsif (unsigned(INSIGNAL) > 519) then
-			n := 269589;
-		 elsif (unsigned(INSIGNAL) > 454) then
-			n := 206612;
-		 elsif (unsigned(INSIGNAL) > 397) then
-			n := 158346;
-		 elsif (unsigned(INSIGNAL) > 348) then
-			n := 121356;
-		 elsif (unsigned(INSIGNAL) > 304) then
-			n := 93006;
-		 elsif (unsigned(INSIGNAL) > 266) then
-			n := 71280;
-		 elsif (unsigned(INSIGNAL) > 233) then
-			n := 54628;
-		 elsif (unsigned(INSIGNAL) > 204) then
-			n := 41867;
-		 elsif (unsigned(INSIGNAL) > 179) then
-			n := 32086;
-		 elsif (unsigned(INSIGNAL) > 156) then
-			n := 24591;
-		 elsif (unsigned(INSIGNAL) > 137) then
-			n := 18846;
-		 elsif (unsigned(INSIGNAL) > 120) then
-			n := 14443;
-		 elsif (unsigned(INSIGNAL) > 105) then
-			n := 11069;
-		 elsif (unsigned(INSIGNAL) > 92) then
-			n := 8483;
-		 elsif (unsigned(INSIGNAL) > 80) then
-			n := 6501;
-		 elsif (unsigned(INSIGNAL) > 70) then
-			n := 4983;
-		 elsif (unsigned(INSIGNAL) > 61) then
-			n := 3819;
-		 elsif (unsigned(INSIGNAL) > 54) then
-			n := 2926;
-		 elsif (unsigned(INSIGNAL) > 47) then
-			n := 2243;
-		 elsif (unsigned(INSIGNAL) > 41) then
-			n := 1719;
-		 elsif (unsigned(INSIGNAL) > 36) then
-			n := 1317;
-		 elsif (unsigned(INSIGNAL) > 31) then
-			n := 1009;
-		 elsif (unsigned(INSIGNAL) > 27) then
-			n := 773;
-		 elsif (unsigned(INSIGNAL) > 24) then
-			n := 593;
-		 elsif (unsigned(INSIGNAL) > 21) then
-			n := 454;
-		 elsif (unsigned(INSIGNAL) > 18) then
-			n := 348;
-		 elsif (unsigned(INSIGNAL) > 16) then
-			n := 266;
-		 elsif (unsigned(INSIGNAL) > 14) then
-			n := 204;
-		 elsif (unsigned(INSIGNAL) > 12) then
-			n := 156;
-		 elsif (unsigned(INSIGNAL) > 10) then
-			n := 120;
-		 elsif (unsigned(INSIGNAL) > 9) then
-			n := 92;
-		 elsif (unsigned(INSIGNAL) > 8) then
-			n := 70;
-		 elsif (unsigned(INSIGNAL) > 7) then
-			n := 54;
-		 elsif (unsigned(INSIGNAL) > 6) then
-			n := 41;
-		 elsif (unsigned(INSIGNAL) > 5) then
-			n := 31;
-		 elsif (unsigned(INSIGNAL) > 4) then
-			n := 24;
-		 elsif (unsigned(INSIGNAL) > 4) then
-			n := 18;
-		 elsif (unsigned(INSIGNAL) > 3) then
-			n := 14;
-		 elsif (unsigned(INSIGNAL) > 3) then
-			n := 10;
-		 elsif (unsigned(INSIGNAL) > 2) then
-			n := 8;
-		 elsif (unsigned(INSIGNAL) > 2) then
-			n := 6;
-		 elsif (unsigned(INSIGNAL) > 2) then
-			n := 4;
-		 elsif (unsigned(INSIGNAL) > 1) then
-			n := 3;
-		 elsif (unsigned(INSIGNAL) > 1) then
-			n := 2;
-		 elsif (unsigned(INSIGNAL) > 1) then
-			n := 2;
-		 elsif (unsigned(INSIGNAL) > 1) then
-			n := 1;
-		 elsif (unsigned(INSIGNAL) > 1) then
-			n := 1;
 
     	else
     		n := 2;   	

@@ -78,7 +78,7 @@ begin
              to_unsigned(512, 10)    when "100",
              to_unsigned(1024, 10)   when "101",
              to_unsigned(1024, 10)   when others;
-             
+
 --    with WIN_CHOOSE select  -- signal windows in ms
 --        SIGWIN <= 32    when "0000",
 --                  64    when "0001",
@@ -95,17 +95,17 @@ begin
 --                  65536 when others;
 
     with WIN_CHOOSE select  -- signal windows in ms
-        SIGWIN <= x"0020"    when "0000",
-                  x"0040"    when "0001",
-                  x"0080"   when "0010",
-                  x"0100"   when "0011",
-                  x"0200"   when "0100",
-                  x"0400"  when "0101",
-                  x"0800"  when "0110",
-                  x"1000"  when "0111",
-                  x"2000"  when "1000",
-                  x"4000" when "1001",
-                  x"8000" when "1010",
+        SIGWIN <= x"0020"    when "0000", --   32
+                  x"0040"    when "0001", --   64
+                  x"0080"   when "0010",  --  128
+                  x"0100"   when "0011",  --  256
+                  x"0200"   when "0100",  --  512
+                  x"0400"  when "0101",   -- 1024
+                  x"0800"  when "0110",   -- 2048
+                  x"1000"  when "0111",   -- 4096
+                  x"2000"  when "1000",   -- 8196
+                  x"4000" when "1001",    --16384
+                  x"8000" when "1010",    --32768
                   to_unsigned(65536, 16) when "1011",
                   to_unsigned(65536, 16) when others;
                   
@@ -114,6 +114,7 @@ begin
                  x"8000"  when "0101" | "0110" | "0111",
                  to_unsigned(65536, 16)  when "1000" | "1001" | "1010" | "1011",
                  to_unsigned(65536, 16)  when others;
+                 BGWIN <= x"0020" ;
 
 -- So we have integration time options of 32-1024 ms, signal time windows of 32-65536 ms and 
 -- background time windows of 16384-65536 ms. In this case the possible values of n are between 
@@ -201,7 +202,7 @@ begin
                 counter <= to_unsigned(0, 14);
             end if;   
             
-            if step_counter = (SIGWIN/T) + (BGWIN/T) then   -- Stack full check: step_counter = n+NN
+            if step_counter*T = SIGWIN + BGWIN then   -- Stack full check: step_counter = n+NN; was step_counter = (SIGWIN/T) + (BGWIN/T)
                 stackfull <= '1';
             end if;
              
@@ -221,7 +222,7 @@ begin
     
      
     S_And_B_Accumulation : process (stack, sbreset) is
-        Variable n, NN      : unsigned (10 downto 0);
+        Variable n, NN      : unsigned (15 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
@@ -230,11 +231,16 @@ begin
             accumulated_background := to_unsigned(0, 20); 
         end if;
         
-        n := to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);
-        NN := to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
+        n := shift_right(SIGWIN, 5+to_integer(unsigned(T_CHOOSE)));
+        -- was: to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);
+        NN := shift_right(BGWIN, 5+to_integer(unsigned(T_CHOOSE)));
+        -- was: to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
         accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
         accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         S <= accumulated_signal / n;
+        
+        --takes 0 logic cells if: shift_right(accumulated_signal, to_integer(unsigned(WIN_CHOOSE)) - to_integer(unsigned(T_CHOOSE)));
+        -- n = 2^(WIN_CHOOSE - T_CHOOSE), since T = 2^(T_CHOOSE+5) and SIGWIN = 2^(WIN_CHOOSE+5)
         B <= accumulated_background / NN;
         
     end process S_And_B_Accumulation;
