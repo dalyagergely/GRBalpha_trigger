@@ -1,0 +1,18 @@
+Final Design Statistics
+    Number of LUTs      	:	5370
+    Number of DFFs      	:	39
+    Number of DFFs packed to IO	:	0
+    Number of Carrys    	:	1935
+    Number of RAMs      	:	0
+    Number of ROMs      	:	0
+    Number of IOs       	:	15
+    Number of GBIOs     	:	1
+    Number of GBs       	:	0
+    Number of WarmBoot  	:	0
+    Number of PLLs      	:	0
+Device Utilization Summary
+    LogicCells                  :	5648/7680
+    PLBs                        :	849/960
+    BRAMs                       :	0/32
+    IOs and GBIOs               :	16/178
+    PLLs                        :	0/2

@@ -44,11 +44,12 @@ constant CLK_FREQ_KHZ   : integer := 12000;
 signal EMIN         : std_logic_vector (15 downto 0);
 signal EMAX         : std_logic_vector (15 downto 0);
 signal T            : unsigned (9 downto 0);
+--signal SIGWIN       : unsigned (15 downto 0);
+--signal BGWIN        : unsigned (15 downto 0);
 signal K            : unsigned (7 downto 0);
 signal counter      : unsigned (13 downto 0);
 
 signal stack : shift_register := (others => to_unsigned(0, 14));
-
 
 signal SA           : unsigned (19 downto 0);
 signal BA           : unsigned (19 downto 0);
@@ -58,7 +59,6 @@ signal SC           : unsigned (19 downto 0);
 signal BC           : unsigned (19 downto 0);
 
 signal stackfull    : std_logic := '0';
-signal sbreset      : std_logic := '0';
 signal comp1A       : std_logic := '0';
 signal comp2A       : std_logic := '0';
 signal comp1B       : std_logic := '0';
@@ -78,14 +78,14 @@ begin
              to_unsigned(1024, 10)   when "101",
              to_unsigned(1024, 10)   when others;
 
-        
+
     K <= K_CHOOSE;
     
 
      
     Clk_Proc : process (CLK, EMIN, EMAX, T, K, trigback) is
         variable ticks                  : unsigned (13 downto 0) := to_unsigned(0, 14);  -- for size we should know CLK_FREQ_KHZ
-        variable millisecs              : unsigned (9 downto 0) := to_unsigned(0, 10);  -- have to have at least the same size as T
+        variable millisecs              : unsigned (10 downto 0) := to_unsigned(0, 11);  -- have to have at least the same size as T
         variable step_counter           : unsigned (11 downto 0) := to_unsigned(0, 12);  -- have to have size>=n+N
         variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
         variable T_old                  : unsigned (9 downto 0);
@@ -96,15 +96,14 @@ begin
     
         if rising_edge(CLK) then
 
-			if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
-		        ticks := to_unsigned(0, 14);
-		        millisecs := to_unsigned(0, 10);
-		        step_counter := to_unsigned(0, 12);
-		        stackfull <= '0';
-		        stack <= (others => to_unsigned(0, 14));
-		        counter <= to_unsigned(0, 14);
-				sbreset <= '1';
-			end if;
+	    if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
+            	ticks := to_unsigned(0, 14);
+            	millisecs := to_unsigned(0, 11);
+            	step_counter := to_unsigned(0, 12);
+            	stackfull <= '0';
+            	stack <= (others => to_unsigned(0, 14));
+            	counter <= to_unsigned(0, 14);
+	    end if;
 
 
             ticks := ticks + 1;
@@ -120,15 +119,15 @@ begin
             
             if millisecs = T then
                 stack(0) <=  counter;
-                for i in 4095 downto 1 loop
+                for i in 4095 downto 1 loop -- shift_right does not work here, it's for unsigned values - fg
 	                stack(i) <= stack(i-1);
                 end loop;
                 step_counter := step_counter + 1;
-                millisecs := to_unsigned(0, 10);
+                millisecs := to_unsigned(0, 11);
                 counter <= to_unsigned(0, 14);
             end if;   
             
-            if step_counter*T = 73732 then   -- Stack full check: step_counter = n+NN; the highest SIGWIN & BGWIN values have to be used, i.e. 8196+65536=73732
+            if step_counter*T = 73728 then   -- Stack full check: step_counter = n+NN; was step_counter = (SIGWIN/T) + (BGWIN/T)
                 stackfull <= '1';
             end if;
              
@@ -145,53 +144,62 @@ begin
 
     
      
-    S_And_B_Accumulation_A : process (stack, sbreset) is
+    S_And_B_Accumulation_A : process (stack, trigback) is
         Variable n, NN      : unsigned (15 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
-        if sbreset = '1' then
+        if trigback = '1' then
             accumulated_signal := to_unsigned(0, 20);
             accumulated_background := to_unsigned(0, 20); 
         end if;
         
+        --n := shift_right(SIGWIN, 5+to_integer(unsigned(T_CHOOSE)));
         n := shift_right(to_unsigned(32, 16), 5+to_integer(unsigned(T_CHOOSE)));
+        -- was: to_unsigned(to_integer(SIGWIN) / to_integer(T), 11);
         NN := shift_right(to_unsigned(16384, 16), 5+to_integer(unsigned(T_CHOOSE)));
+        -- was: to_unsigned(to_integer(BGWIN) / to_integer(T), 11);
         accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
         accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         SA <= accumulated_signal / n;
-		BA <= accumulated_background / NN;        
+        
+        --takes 0 logic cells if: shift_right(accumulated_signal, to_integer(unsigned(WIN_CHOOSE)) - to_integer(unsigned(T_CHOOSE)));
+        -- n = 2^(WIN_CHOOSE - T_CHOOSE), since T = 2^(T_CHOOSE+5) and SIGWIN = 2^(WIN_CHOOSE+5)
+        BA <= accumulated_background / NN;
+        
     end process S_And_B_Accumulation_A;
      
      
-    Comparison1_A : process (SA, BA, K) is
+    Comparison1A : process (SA, BA, K) is
        variable SmBsq       : unsigned (19 downto 0);
     begin
-       SmBsq := to_unsigned(to_integer(SA - BA) * to_integer(SA - BA), 20); 
+       SmBsq := to_unsigned(to_integer(SA - BA) * to_integer(SA - BA), 20); -- problems with "**" operator - fg
+            
        if SmBsq > K*BA then
            comp1A <= '1';
        else
            comp1A <= '0';
-       end if;
-    end process Comparison1_A;       
+       end if;            
+    end process Comparison1A;       
      
      
-    Comparison2_A : process (SA, BA) is
+    Comparison2A : process (SA, BA) is
     begin 
         if SA > BA then
             comp2A <= '1';
         else
             comp2A <= '0';
         end if;
-    end process Comparison2_A;
+    end process Comparison2A;
     
     
-    S_And_B_Accumulation_B : process (stack, sbreset) is
+    
+    S_And_B_Accumulation_B : process (stack, trigback) is
         Variable n, NN      : unsigned (15 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
-        if sbreset = '1' then
+        if trigback = '1' then
             accumulated_signal := to_unsigned(0, 20);
             accumulated_background := to_unsigned(0, 20); 
         end if;
@@ -201,67 +209,82 @@ begin
         accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
         accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         SB <= accumulated_signal / n;
-		BB <= accumulated_background / NN;        
+        
+        --takes 0 logic cells if: shift_right(accumulated_signal, to_integer(unsigned(WIN_CHOOSE)) - to_integer(unsigned(T_CHOOSE)));
+        -- n = 2^(WIN_CHOOSE - T_CHOOSE), since T = 2^(T_CHOOSE+5) and SIGWIN = 2^(WIN_CHOOSE+5)
+        BB <= accumulated_background / NN;
+        
     end process S_And_B_Accumulation_B;
-          
-    Comparison1_B : process (SB, BB, K) is
+    
+
+    Comparison1B : process (SB, BB, K) is
        variable SmBsq       : unsigned (19 downto 0);
     begin
-       SmBsq := to_unsigned(to_integer(SB - BB) * to_integer(SB - BB), 20); 
+       SmBsq := to_unsigned(to_integer(SB - BB) * to_integer(SB - BB), 20); -- problems with "**" operator - fg
+            
        if SmBsq > K*BB then
            comp1B <= '1';
        else
            comp1B <= '0';
-       end if;
-    end process Comparison1_B;       
-         
-    Comparison2_B : process (SB, BB) is
+       end if;            
+    end process Comparison1B;       
+     
+     
+    Comparison2B : process (SB, BB) is
     begin 
         if SB > BB then
             comp2B <= '1';
         else
             comp2B <= '0';
         end if;
-    end process Comparison2_B;
+    end process Comparison2B;
     
     
-    S_And_B_Accumulation_C : process (stack, sbreset) is
+    
+    
+    S_And_B_Accumulation_C : process (stack, trigback) is
         Variable n, NN      : unsigned (15 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
-        if sbreset = '1' then
+        if trigback = '1' then
             accumulated_signal := to_unsigned(0, 20);
             accumulated_background := to_unsigned(0, 20); 
         end if;
         
-        n := shift_right(to_unsigned(8196, 16), 5+to_integer(unsigned(T_CHOOSE)));
+        n := shift_right(to_unsigned(8192, 16), 5+to_integer(unsigned(T_CHOOSE)));
         NN := shift_right(to_unsigned(65536, 16), 5+to_integer(unsigned(T_CHOOSE)));
         accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
         accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         SC <= accumulated_signal / n;
-		BC <= accumulated_background / NN;        
+        
+        BC <= accumulated_background / NN;
+        
     end process S_And_B_Accumulation_C;
-          
-    Comparison1_C : process (SC, BC, K) is
+    
+
+    Comparison1C : process (SC, BC, K) is
        variable SmBsq       : unsigned (19 downto 0);
     begin
-       SmBsq := to_unsigned(to_integer(SC - BC) * to_integer(SC - BC), 20); 
+       SmBsq := to_unsigned(to_integer(SC - BC) * to_integer(SC - BC), 20); -- problems with "**" operator - fg
+            
        if SmBsq > K*BC then
            comp1C <= '1';
        else
            comp1C <= '0';
-       end if;
-    end process Comparison1_C;       
-         
-    Comparison2_C : process (SC, BC) is
+       end if;            
+    end process Comparison1C;       
+     
+     
+    Comparison2C : process (SC, BC) is
     begin 
         if SC > BC then
             comp2C <= '1';
         else
             comp2C <= '0';
         end if;
-    end process Comparison2_C;
+    end process Comparison2C;
+
     
     
     Triggering : process (comp1A, comp2A, comp1B, comp2B, comp1C, comp2C, stackfull, CLEAR) is
@@ -271,11 +294,11 @@ begin
             trigback <= '1';
             WHICH <= 00;
         elsif (comp1B = '1' and comp2B = '1' and CLEAR = '0' and stackfull = '1') then
-            TRIGGER <= '1';
+        	TRIGGER <= '1';
             trigback <= '1';
             WHICH <= 01;
         elsif (comp1C = '1' and comp2C = '1' and CLEAR = '0' and stackfull = '1') then
-            TRIGGER <= '1';
+        	TRIGGER <= '1';
             trigback <= '1';
             WHICH <= 10;
         else

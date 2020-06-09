@@ -114,7 +114,6 @@ begin
                  x"8000"  when "0101" | "0110" | "0111",
                  to_unsigned(65536, 16)  when "1000" | "1001" | "1010" | "1011",
                  to_unsigned(65536, 16)  when others;
-                 BGWIN <= x"0020" ;
 
 -- So we have integration time options of 32-1024 ms, signal time windows of 32-65536 ms and 
 -- background time windows of 16384-65536 ms. In this case the possible values of n are between 
