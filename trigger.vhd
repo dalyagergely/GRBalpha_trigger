@@ -10,15 +10,15 @@ use ieee.math_real.all;
 
 entity TrigCircuit is
     port (
-        EMIN_CHOOSE         : inout std_logic_vector (7 downto 0);  
-        EMAX_CHOOSE         : inout std_logic_vector (7 downto 0);
+        EMIN_CHOOSE         : inout std_logic_vector (3 downto 0);  
+        EMAX_CHOOSE         : inout std_logic_vector (3 downto 0);
         T_CHOOSE            : inout std_logic_vector (2 downto 0);
         -- T is the integration time of the counter before the stack
         K_CHOOSE            : inout unsigned (7 downto 0);
         -- K is the multiplicator for the background i.e. we compare (S-B)^2 to K*B
         WIN_CHOOSE          : inout std_logic_vector (3 downto 0);
         -- Choose the time window for signal and background accumulation
-        PH                  : in std_logic_vector (11 downto 0);
+        PH                  : in unsigned (11 downto 0);
         -- The output of the gamma detector is 12 bit ADC data
         CLK                 : in std_logic;
         CLEAR               : in std_logic := '0';
@@ -43,8 +43,8 @@ type shift_register is array (0 to 4095) of unsigned (13 downto 0); -- array siz
 --constant CLK_FREQ_KHZ   : integer := 1/CLK_TIME_MS;
 constant CLK_FREQ_KHZ   : integer := 12000;
 
-signal EMIN         : std_logic_vector (15 downto 0);
-signal EMAX         : std_logic_vector (15 downto 0);
+signal EMIN         : unsigned (15 downto 0);
+signal EMAX         : unsigned (15 downto 0);
 signal T            : unsigned (9 downto 0);
 signal SIGWIN       : unsigned (15 downto 0);
 signal BGWIN        : unsigned (15 downto 0);
@@ -63,7 +63,6 @@ signal S            : unsigned (19 downto 0);
 signal B            : unsigned (19 downto 0);
 
 signal stackfull    : std_logic := '0';
-signal sbreset      : std_logic := '0';
 signal comp1        : std_logic := '0';
 signal comp2        : std_logic := '0';
 signal trigback     : std_logic := '0';
@@ -124,11 +123,37 @@ begin
 
 -- took these out to check synthesis - fg
      
---    with EMIN_CHOOSE select  -- Energy range ~ 10-10.000 keV
---        EMIN <= ...
+    with EMIN_CHOOSE select  -- Energy range ~ 10-10.000 keV
+        EMIN <= x"0008" when "0000", --    8
+        		x"0010" when "0001", --   16
+        		x"0020" when "0010", --   32
+                x"0040" when "0011", --   64
+                x"0080" when "0100", --  128
+                x"0100" when "0101", --  256
+                x"0200" when "0110", --  512
+                x"0400" when "0111", -- 1024
+                x"0800" when "1000", -- 2048
+                x"1000" when "1001", -- 4096
+                x"2000" when "1010", -- 8196
+                x"4000" when "1011", --16384
+                x"8000" when "1100", --32768
+                to_unsigned(65536, 16) when others;
      
---    with EMAX_CHOOSE select
---        EMAX <= ... 
+    with EMAX_CHOOSE select
+        EMAX <= x"0008" when "0000", --    8
+        		x"0010" when "0001", --   16
+        		x"0020" when "0010", --   32
+                x"0040" when "0011", --   64
+                x"0080" when "0100", --  128
+                x"0100" when "0101", --  256
+                x"0200" when "0110", --  512
+                x"0400" when "0111", -- 1024
+                x"0800" when "1000", -- 2048
+                x"1000" when "1001", -- 4096
+                x"2000" when "1010", -- 8196
+                x"4000" when "1011", --16384
+                x"8000" when "1100", --32768
+                to_unsigned(65536, 16) when others;
         
     K <= K_CHOOSE;
     
@@ -150,21 +175,12 @@ begin
         variable ticks                  : unsigned (13 downto 0) := to_unsigned(0, 14);  -- for size we should know CLK_FREQ_KHZ
         variable millisecs              : unsigned (9 downto 0) := to_unsigned(0, 10);  -- have to have at least the same size as T
         variable step_counter           : unsigned (11 downto 0) := to_unsigned(0, 12);  -- have to have size>=n+N
-        variable EMIN_old, EMAX_old     : std_logic_vector (15 downto 0);
+        variable EMIN_old, EMAX_old     : unsigned (15 downto 0);
         variable SIGWIN_old, BGWIN_old  : unsigned (15 downto 0);
         variable T_old                  : unsigned (9 downto 0);
         variable K_old                  : unsigned (7 downto 0);
     begin
     
---        if (EMIN /= EMIN_old) or (EMAX /= EMAX_old) or (SIGWIN /= SIGWIN_old) or (BGWIN /= BGWIN_old) or (T /= T_old) or (K /= K_old) or trigback = '1' then
---            ticks := to_unsigned(0, 8);
---            millisecs := to_unsigned(0, 10);
---            step_counter := to_unsigned(0, 12);
---            stackfull <= '0';
---            stack <= (others => to_unsigned(0, 14));
---            counter <= to_unsigned(0, 14);
---            sbreset <= not sbreset;
---        end if;
     
         if rising_edge(CLK) then
 
@@ -175,8 +191,6 @@ begin
             	stackfull <= '0';
             	stack <= (others => to_unsigned(0, 14));
             	counter <= to_unsigned(0, 14);
-            	--sbreset <= not sbreset;
-		sbreset <= '1';
 	    end if;
 
 
@@ -220,12 +234,12 @@ begin
 
     
      
-    S_And_B_Accumulation : process (stack, sbreset) is
+    S_And_B_Accumulation : process (stack, trigback) is
         Variable n, NN      : unsigned (15 downto 0);
         Variable accumulated_signal, accumulated_background : unsigned (19 downto 0) := to_unsigned(0, 20);
     begin
     
-        if sbreset = '1' then
+        if trigback = '1' then
             accumulated_signal := to_unsigned(0, 20);
             accumulated_background := to_unsigned(0, 20); 
         end if;
@@ -237,9 +251,6 @@ begin
         accumulated_signal := accumulated_signal + stack(0) - stack(to_integer(n));  
         accumulated_background := accumulated_background + stack(to_integer(n)) - stack(to_integer(n+NN));
         S <= accumulated_signal / n;
-        
-        --takes 0 logic cells if: shift_right(accumulated_signal, to_integer(unsigned(WIN_CHOOSE)) - to_integer(unsigned(T_CHOOSE)));
-        -- n = 2^(WIN_CHOOSE - T_CHOOSE), since T = 2^(T_CHOOSE+5) and SIGWIN = 2^(WIN_CHOOSE+5)
         B <= accumulated_background / NN;
         
     end process S_And_B_Accumulation;
@@ -248,7 +259,7 @@ begin
     Comparison1 : process (S, B, K) is
        variable SmBsq       : unsigned (19 downto 0);
     begin
-       SmBsq := to_unsigned(to_integer(S - B) * to_integer(S - B), 20); -- problems with "**" operator - fg
+       SmBsq := to_unsigned(to_integer(S - B) * to_integer(S - B), 20);
             
        if SmBsq > K*B then
            comp1 <= '1';
